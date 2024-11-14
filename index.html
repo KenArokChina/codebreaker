@@ -135,11 +135,11 @@
             }
 
             // Mengecek tebakan dan memberikan feedback
-            const { benarPosisi, benarAngka } = cekTebakan(angkaTujuan, tebakan);
-            history.push({ tebakan, benarPosisi, benarAngka });
+            const benarPosisi = cekBenarPosisi(angkaTujuan, tebakan);
+            history.push({ tebakan, benarPosisi });
 
             // Menampilkan feedback
-            let feedbackMessage = `Tebakan ${tebakan}: ${benarPosisi} angka benar di posisi yang benar, ${benarAngka} angka benar tetapi posisi salah.`;
+            let feedbackMessage = `Tebakan ${tebakan}: ${benarPosisi} angka benar di posisi yang benar.`;
 
             // Jika tebakan benar (semua posisi cocok)
             if (benarPosisi === 4) {
@@ -156,9 +156,8 @@
         });
 
         // Fungsi untuk memeriksa hasil tebakan
-        function cekTebakan(angka, tebakan) {
+        function cekBenarPosisi(angka, tebakan) {
             let benarPosisi = 0;
-            let benarAngka = 0;
             let angkaTemp = angka.split('');
             let tebakanTemp = tebakan.split('');
 
@@ -170,15 +169,7 @@
                 }
             }
 
-            // Cek angka yang benar tetapi di posisi yang salah
-            for (let i = 0; i < 4; i++) {
-                if (angkaTemp.includes(tebakanTemp[i]) && tebakanTemp[i] !== 'x') {
-                    benarAngka++;
-                    angkaTemp[angkaTemp.indexOf(tebakanTemp[i])] = 'x'; // Tandai angka yang sudah dihitung
-                }
-            }
-
-            return { benarPosisi, benarAngka };
+            return benarPosisi;
         }
 
         // Fungsi untuk memperbarui history tebakan
@@ -188,10 +179,10 @@
 
             history.forEach((entry, index) => {
                 const li = document.createElement("li");
-                li.textContent = `Tebakan ke-${index + 1}: ${entry.tebakan} | Benar posisi: ${entry.benarPosisi} | Benar angka: ${entry.benarAngka}`;
+                li.textContent = `Tebakan ke-${index + 1}: ${entry.tebakan} | Benar posisi: ${entry.benarPosisi}`;
                 historyList.appendChild(li);
             });
         }
     </script>
 </body>
-  </html>
+</html>
