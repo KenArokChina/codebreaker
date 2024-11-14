@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Tebak 4 Angka</title>
+    <style>
+        /* CSS untuk styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .game-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+
+        h1, h2, h3 {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .history {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #333;
+            text-align: left;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #feedback {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Game Tebak 4 Angka</h1>
+        
+        <!-- Bagian Pemain 1 -->
+        <div id="player1">
+            <h2>Pemain 1</h2>
+            <label for="angka-tujuan">Masukkan angka yang akan ditebak (4 digit): </label>
+            <input type="text" id="angka-tujuan" maxlength="4" placeholder="Contoh: 1234">
+            <button id="set-angka">Set Angka</button>
+        </div>
+
+        <!-- Bagian Pemain 2 -->
+        <div id="player2" style="display:none;">
+            <h2>Pemain 2</h2>
+            <label for="tebakan">Masukkan tebakan (4 digit): </label>
+            <input type="text" id="tebakan" maxlength="4" placeholder="Contoh: 4321">
+            <button id="submit-tebakan">Tebak!</button>
+        </div>
+
+        <!-- Feedback dan History -->
+        <div id="feedback"></div>
+        
+        <div class="history">
+            <h3>History Tebakan:</h3>
+            <ul id="history-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript untuk logika permainan
+        let angkaTujuan = "";
+        let attempts = 0;
+        let history = [];
+
+        // Set angka yang akan ditebak oleh pemain 1
+        document.getElementById("set-angka").addEventListener("click", function() {
+            angkaTujuan = document.getElementById("angka-tujuan").value;
+
+            // Validasi angka
+            if (angkaTujuan.length !== 4 || isNaN(angkaTujuan)) {
+                alert("Angka yang dimasukkan harus 4 digit.");
+                return;
+            }
+
+            // Menyembunyikan input pemain 1 dan menampilkan input pemain 2
+            document.getElementById("player1").style.display = "none";
+            document.getElementById("player2").style.display = "block";
+        });
+
+        // Memproses tebakan dari pemain 2
+        document.getElementById("submit-tebakan").addEventListener("click", function() {
+            const tebakan = document.getElementById("tebakan").value;
+
+            // Validasi tebakan
+            if (tebakan.length !== 4 || isNaN(tebakan)) {
+                alert("Tebakan harus berupa angka 4 digit.");
+                return;
+            }
+
+            // Mengecek tebakan dan memberikan feedback
+            const { benarPosisi, benarAngka } = cekTebakan(angkaTujuan, tebakan);
+            history.push({ tebakan, benarPosisi, benarAngka });
+
+            // Menampilkan feedback
+            let feedbackMessage = `Tebakan ${tebakan}: ${benarPosisi} angka benar di posisi yang benar, ${benarAngka} angka benar tetapi posisi salah.`;
+
+            // Jika tebakan benar (semua posisi cocok)
+            if (benarPosisi === 4) {
+                feedbackMessage = `Selamat! Tebakan Anda benar. Angka yang benar adalah ${angkaTujuan}.`;
+                document.getElementById("player2").style.display = "none"; // Menyembunyikan bagian tebakan
+            }
+
+            // Menampilkan feedback
+            document.getElementById("feedback").innerHTML = feedbackMessage;
+
+            // Menampilkan history
+            updateHistory();
+            attempts++;
+        });
+
+        // Fungsi untuk memeriksa hasil tebakan
+        function cekTebakan(angka, tebakan) {
+            let benarPosisi = 0;
+            let benarAngka = 0;
+            let angkaTemp = angka.split('');
+            let tebakanTemp = tebakan.split('');
+
+            // Cek posisi yang benar
+            for (let i = 0; i < 4; i++) {
+                if (angkaTemp[i] === tebakanTemp[i]) {
+                    benarPosisi++;
+                    angkaTemp[i] = tebakanTemp[i] = 'x'; // Tandai angka yang sudah cocok
+                }
+            }
+
+            // Cek angka yang benar tetapi di posisi yang salah
+            for (let i = 0; i < 4; i++) {
+                if (angkaTemp.includes(tebakanTemp[i]) && tebakanTemp[i] !== 'x') {
+                    benarAngka++;
+                    angkaTemp[angkaTemp.indexOf(tebakanTemp[i])] = 'x'; // Tandai angka yang sudah dihitung
+                }
+            }
+
+            return { benarPosisi, benarAngka };
+        }
+
+        // Fungsi untuk memperbarui history tebakan
+        function updateHistory() {
+            const historyList = document.getElementById("history-list");
+            historyList.innerHTML = ""; // Kosongkan list sebelum menambah yang baru
+
+            history.forEach((entry, index) => {
+                const li = document.createElement("li");
+                li.textContent = `Tebakan ke-${index + 1}: ${entry.tebakan} | Benar posisi: ${entry.benarPosisi} | Benar angka: ${entry.benarAngka}`;
+                historyList.appendChild(li);
+            });
+        }
+    </script>
+</body>
+  </html>
